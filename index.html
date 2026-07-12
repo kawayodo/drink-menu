@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kawayodo Drink Menu / 川淀 ドリンクメニュー</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= Age gate ================= -->
+<div id="age-gate" class="screen active">
+  <div class="gate-card">
+    <img src="assets/logo.png" class="gate-logo" alt="川淀">
+    <h1>KAWAYODO DRINK MENU</h1>
+    <p class="bilingual">
+      Are you 20 years of age or older?<br>
+      <span class="ja">20歳以上ですか？</span>
+    </p>
+    <div class="gate-buttons">
+      <button id="age-yes" class="btn btn-primary">Yes / はい</button>
+      <button id="age-no" class="btn btn-secondary">No / いいえ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Menu screen ================= -->
+<div id="menu-screen" class="screen">
+  <header class="site-header">
+    <img src="assets/logo.png" class="site-logo" alt="川淀">
+    <div class="header-text">
+      <h1>KAWAYODO</h1>
+      <p>Drink Menu / ドリンクメニュー</p>
+    </div>
+    <div class="age-note" id="age-note"></div>
+  </header>
+  <nav class="category-nav" id="category-nav"></nav>
+  <main id="menu-list"></main>
+  <div class="cart-bar">
+    <button id="view-order-btn">View Order / 注文を確認 (<span id="cart-count">0</span>)</button>
+  </div>
+</div>
+
+<!-- ================= Order (customer) screen ================= -->
+<div id="order-screen" class="screen">
+  <header class="sub-header">
+    <button class="back-btn" id="order-back-btn">&larr; Back / 戻る</button>
+    <h2>Your Order / 注文内容</h2>
+  </header>
+  <div id="order-list"></div>
+  <div class="order-actions">
+    <button id="show-staff-btn" class="btn btn-primary">Show to Staff / 店員に見せる</button>
+  </div>
+</div>
+
+<!-- ================= Staff screen ================= -->
+<div id="staff-screen" class="screen">
+  <header class="sub-header staff-header">
+    <button class="back-btn" id="staff-back-btn">&larr; 戻る</button>
+    <h2>ご注文内容</h2>
+  </header>
+  <div id="staff-list"></div>
+</div>
+
+<script>
+/* ============================================================
+   Drink data (source of truth: 川淀_ドリンクメニュー.xlsx)
+   ============================================================ */
+const DRINKS = [
+  // ---- Wine ----
+  { id:"wine-yellowtail-cab", category_ja:"ワイン", category_en:"Wine",
+    name_ja:"イエローテイル カベルネ・ソーヴィニヨン(赤)（オーストラリア）187ml",
+    name_en:"Yellow Tail Cabernet Sauvignon (Red, Australia) 187ml",
+    desc_en:"Smooth and full-bodied, with rich, deep fruit flavor.",
+    price:1160, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"wine-concha-chardonnay", category_ja:"ワイン", category_en:"Wine",
+    name_ja:"コンチャ・イ・トロ サンライズ シャルドネ(白)（チリ）250ml",
+    name_en:"Concha y Toro Sunrise Chardonnay (White, Chile) 250ml",
+    desc_en:"Fresh acidity beautifully balanced with rich fruit aroma.",
+    price:1160, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+
+  // ---- Sparkling ----
+  { id:"sparkling-freixenet", category_ja:"スパークリング", category_en:"Sparkling",
+    name_ja:"フレシネ コルドン・ネグロ ブリュット 200ml",
+    name_en:"Freixenet Cordon Negro Brut 200ml",
+    desc_en:"A dry sparkling wine with fruity aroma and gorgeous flavor.",
+    price:1430, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+
+  // ---- Sake (seishu) ----
+  { id:"sake-kikumasamune", category_ja:"清酒", category_en:"Sake",
+    name_ja:"菊正宗（兵庫）辛口",
+    name_en:"Kikumasamune (Hyogo) Dry",
+    desc_en:"Brewed with Nada's famous water and Yamada Nishiki rice — crisp yet deep in flavor.",
+    price:700, requiresGlassCount:true, vesselType:"tokkuri", servingStyles:[{ja:"熱燗",en:"Hot (Atsukan)"},{ja:"ひや",en:"Cold (Hiya)"}] },
+  { id:"sake-daishichi", category_ja:"清酒", category_en:"Sake",
+    name_ja:"大七 純米生酛（福島）",
+    name_en:"Daishichi Junmai Kimoto (Fukushima)",
+    desc_en:"Rich, deep umami with an elegant aroma and clean finish.",
+    price:750, requiresGlassCount:true, vesselType:"tokkuri", servingStyles:[{ja:"熱燗",en:"Hot (Atsukan)"},{ja:"ひや",en:"Cold (Hiya)"}] },
+  { id:"sake-kubota", category_ja:"清酒", category_en:"Sake",
+    name_ja:"久保田（新潟）千寿",
+    name_en:"Kubota Senju (Niigata)",
+    desc_en:"A clean, dry sake with an elegant, gentle aroma.",
+    price:770, requiresGlassCount:true, vesselType:"tokkuri", servingStyles:[{ja:"熱燗",en:"Hot (Atsukan)"},{ja:"ひや",en:"Cold (Hiya)"}] },
+
+  // ---- Chilled sake / umeshu (reishu) ----
+  { id:"reishu-umeshu", category_ja:"冷酒", category_en:"Chilled Sake",
+    name_ja:"梅酒（グラス）",
+    name_en:"Plum Wine (Glass)",
+    desc_en:"Handmade Shiratama plum wine.",
+    price:620, requiresGlassCount:false,
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water (Mizuwari)"}] },
+  { id:"reishu-kikumasamune", category_ja:"冷酒", category_en:"Chilled Sake",
+    name_ja:"菊正宗（兵庫）辛口／生貯蔵酒／180ml",
+    name_en:"Kikumasamune (Hyogo) Dry / Namachozo / 180ml",
+    desc_en:"Whole-grain brewing draws out the rice's natural umami — a crisp, full-flavored chilled sake.",
+    price:700, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"reishu-suishin", category_ja:"冷酒", category_en:"Chilled Sake",
+    name_ja:"酔心（広島）甘口／特別本醸造／300ml",
+    name_en:"Suishin (Hiroshima) Sweet / Tokubetsu Honjozo / 300ml",
+    desc_en:"Consistently elegant acidity with a refreshing taste you won't tire of.",
+    price:990, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"reishu-asahiyama", category_ja:"冷酒", category_en:"Chilled Sake",
+    name_ja:"朝日山（新潟）辛口／特別本醸造／300ml",
+    name_en:"Asahiyama (Niigata) Dry / Tokubetsu Honjozo / 300ml",
+    desc_en:"Unpasteurized after pressing — smooth and easy to drink chilled.",
+    price:1330, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"reishu-nishinoseki", category_ja:"冷酒", category_en:"Chilled Sake",
+    name_ja:"西の関（大分）辛口／特別本醸造／300ml",
+    name_en:"Nishinoseki (Oita) Dry / Tokubetsu Honjozo / 300ml",
+    desc_en:"Highly aromatic with a rich, savory taste.",
+    price:1520, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"reishu-ugonotsuki", category_ja:"冷酒", category_en:"Chilled Sake",
+    name_ja:"雨後の月（広島）辛口／大吟醸／300ml",
+    name_en:"Ugonotsuki (Hiroshima) Dry / Daiginjo / 300ml",
+    desc_en:"Crisp and dry with a clean finish — winner of numerous awards at home and abroad.",
+    price:1780, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+
+  // ---- Beer & others ----
+  { id:"beer-asahi-draft-glass", category_ja:"ビール他", category_en:"Beer & Others",
+    name_ja:"生ビール アサヒスーパードライ（グラス）",
+    name_en:"Draft Beer — Asahi Super Dry (Glass)",
+    desc_en:"", price:580, requiresGlassCount:false, servingStyles:[] },
+  { id:"beer-asahi-draft-mug", category_ja:"ビール他", category_en:"Beer & Others",
+    name_ja:"生ビール アサヒスーパードライ（ジョッキ）",
+    name_en:"Draft Beer — Asahi Super Dry (Mug)",
+    desc_en:"", price:700, requiresGlassCount:false, servingStyles:[] },
+  { id:"beer-asahi-bottle", category_ja:"ビール他", category_en:"Beer & Others",
+    name_ja:"アサヒスーパードライ（中瓶）",
+    name_en:"Asahi Super Dry (Bottle)",
+    desc_en:"", price:700, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"beer-kirin-bottle", category_ja:"ビール他", category_en:"Beer & Others",
+    name_ja:"キリンラガー（中瓶）",
+    name_en:"Kirin Lager (Bottle)",
+    desc_en:"", price:700, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"beer-yebisu-bottle", category_ja:"ビール他", category_en:"Beer & Others",
+    name_ja:"エビスビール（中瓶）",
+    name_en:"Yebisu Beer (Bottle)",
+    desc_en:"", price:750, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"beer-nonalcohol", category_ja:"ビール他", category_en:"Beer & Others",
+    name_ja:"ノンアルコールビール（小瓶）",
+    name_en:"Non-Alcoholic Beer (Small Bottle)",
+    desc_en:"(0.00% alcohol)", price:390, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
+  { id:"beer-highball", category_ja:"ビール他", category_en:"Beer & Others",
+    name_ja:"ハイボール",
+    name_en:"Highball",
+    desc_en:"", price:580, requiresGlassCount:false, servingStyles:[] },
+
+  // ---- Shochu ----
+  { id:"shochu-kurokirishima", category_ja:"焼酎", category_en:"Shochu",
+    name_ja:"黒霧島（いも）",
+    name_en:"Kurokirishima (Sweet Potato)",
+    desc_en:"Black-koji sweetness with a smooth, crisp finish.",
+    price:580, requiresGlassCount:true, vesselType:"bottle",
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water"},{ja:"お湯割り",en:"With Hot Water"}] },
+  { id:"shochu-rokudaime-yuri", category_ja:"焼酎", category_en:"Shochu",
+    name_ja:"六代目百合（いも）",
+    name_en:"Rokudaime Yuri (Sweet Potato)",
+    desc_en:"Light yet deep flavor that fully expresses the aroma of the sweet potato.",
+    price:700, requiresGlassCount:true, vesselType:"bottle",
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water"},{ja:"お湯割り",en:"With Hot Water"}] },
+  { id:"shochu-akarui-nouson", category_ja:"焼酎", category_en:"Shochu",
+    name_ja:"明るい農村 赤芋仕込み（いも）",
+    name_en:"Akarui Nouson Aka-imo Jikomi (Sweet Potato)",
+    desc_en:"Fruity aroma and gentle sweetness from red sweet potato, with a clean finish.",
+    price:810, requiresGlassCount:true, vesselType:"bottle",
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water"},{ja:"お湯割り",en:"With Hot Water"}] },
+  { id:"shochu-nikaido", category_ja:"焼酎", category_en:"Shochu",
+    name_ja:"二階堂（むぎ）",
+    name_en:"Nikaido (Barley)",
+    desc_en:"Made from 100% barley, named directly after its raw ingredient.",
+    price:580, requiresGlassCount:true, vesselType:"bottle",
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water"},{ja:"お湯割り",en:"With Hot Water"}] },
+  { id:"shochu-obinokurakara", category_ja:"焼酎", category_en:"Shochu",
+    name_ja:"おびの蔵から（むぎ）",
+    name_en:"Obi no Kura Kara (Barley)",
+    desc_en:"Blended with aged shochu for a rustic barley aroma and rounded flavor.",
+    price:580, requiresGlassCount:true, vesselType:"bottle",
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water"},{ja:"お湯割り",en:"With Hot Water"}] },
+  { id:"shochu-amaterasu", category_ja:"焼酎", category_en:"Shochu",
+    name_ja:"天照（そば）",
+    name_en:"Amaterasu (Buckwheat)",
+    desc_en:"Vacuum distilled for a light, refined flavor — smooth and clean.",
+    price:580, requiresGlassCount:true, vesselType:"bottle",
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water"},{ja:"お湯割り",en:"With Hot Water"}] },
+  { id:"shochu-sannennetaro", category_ja:"焼酎", category_en:"Shochu",
+    name_ja:"三年寝太郎（こめ）",
+    name_en:"Sannen Netaro (Rice)",
+    desc_en:"Slowly aged for three years — full umami with no harsh edge, easy to drink.",
+    price:580, requiresGlassCount:true, vesselType:"bottle",
+    servingStyles:[{ja:"ロック",en:"On the Rocks"},{ja:"ストレート",en:"Straight (Neat)"},{ja:"水割り",en:"With Water"},{ja:"お湯割り",en:"With Hot Water"}] },
+
+  // ---- Soft drinks ----
+  { id:"soft-orange-juice", category_ja:"ソフトドリンク", category_en:"Soft Drinks",
+    name_ja:"オレンジジュース", name_en:"Orange Juice",
+    desc_en:"", price:390, requiresGlassCount:false, servingStyles:[] },
+  { id:"soft-kirin-lemon", category_ja:"ソフトドリンク", category_en:"Soft Drinks",
+    name_ja:"キリンレモン", name_en:"Kirin Lemon",
+    desc_en:"", price:390, requiresGlassCount:false, servingStyles:[] },
+  { id:"soft-cola", category_ja:"ソフトドリンク", category_en:"Soft Drinks",
+    name_ja:"コーラ", name_en:"Cola",
+    desc_en:"", price:390, requiresGlassCount:false, servingStyles:[] },
+  { id:"soft-oolong", category_ja:"ソフトドリンク", category_en:"Soft Drinks",
+    name_ja:"ウーロン茶", name_en:"Oolong Tea",
+    desc_en:"", price:390, requiresGlassCount:false, servingStyles:[] },
+  { id:"soft-iced-coffee", category_ja:"ソフトドリンク", category_en:"Soft Drinks",
+    name_ja:"アイスコーヒー", name_en:"Iced Coffee",
+    desc_en:"", price:450, requiresGlassCount:false, servingStyles:[] },
+  { id:"soft-hot-coffee", category_ja:"ソフトドリンク", category_en:"Soft Drinks",
+    name_ja:"ホットコーヒー", name_en:"Hot Coffee",
+    desc_en:"", price:450, requiresGlassCount:false, servingStyles:[] },
+];
+
+const NON_ALCOHOL_CATEGORY_JA = "ソフトドリンク";
+
+/* ============================================================
+   State
+   ============================================================ */
+let ageConfirmed = sessionStorage.getItem("kawayodo_age_confirmed");
+// itemState[id] = { qty: number, bottles: number, glasses: number, styleIndex: number|null }
+const itemState = {};
+DRINKS.forEach(d => { itemState[d.id] = { qty: 0, bottles: 0, glasses: 0, styleIndex: d.servingStyles.length ? 0 : null }; });
+
+function isReady(d, st) {
+  return d.requiresGlassCount ? (st.bottles >= 1 && st.glasses >= 1) : st.qty >= 1;
+}
+
+// cart: array of { key, id, name_ja, name_en, price, qty, bottles, glasses, vesselType, style }
+let cart = [];
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+function yen(n) { return "¥" + n.toLocaleString("en-US"); }
+
+// Bottle/tokkuri (shared container) + glass/ochoko (individual serving) labels per vessel type
+const VESSEL_LABELS = {
+  bottle: {
+    containerLabel: "Bottles / 本数",
+    glassLabel: "Glasses / グラス数",
+    containerUnitEn: "bottle", containerUnitJa: "本",
+    glassUnitEn: "glass", glassUnitJa: "杯"
+  },
+  tokkuri: {
+    containerLabel: "Tokkuri (decanter) / 徳利数",
+    glassLabel: "Ochoko (cup) / お猪口数",
+    containerUnitEn: "tokkuri", containerUnitJa: "本",
+    glassUnitEn: "ochoko", glassUnitJa: "杯"
+  }
+};
+const PLURAL_FORMS = { bottle: "bottles", glass: "glasses", tokkuri: "tokkuri", ochoko: "ochoko" };
+function pluralize(word, n) {
+  return n === 1 ? word : (PLURAL_FORMS[word] || word + "s");
+}
+
+function visibleDrinks() {
+  if (ageConfirmed === "no") {
+    return DRINKS.filter(d => d.category_ja === NON_ALCOHOL_CATEGORY_JA);
+  }
+  return DRINKS;
+}
+
+function categoriesInOrder(drinks) {
+  const seen = [];
+  drinks.forEach(d => {
+    if (!seen.find(c => c.ja === d.category_ja)) {
+      seen.push({ ja: d.category_ja, en: d.category_en });
+    }
+  });
+  return seen;
+}
+
+function cartKey(id, bottles, glasses, styleJa) {
+  return id + "|" + bottles + "|" + glasses + "|" + (styleJa || "");
+}
+
+function totalCartCount() {
+  return cart.reduce((sum, item) => sum + item.qty, 0);
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   Rendering: menu
+   ============================================================ */
+function renderMenu() {
+  const drinks = visibleDrinks();
+  const cats = categoriesInOrder(drinks);
+
+  const nav = document.getElementById("category-nav");
+  nav.innerHTML = cats.map((c, i) =>
+    `<button data-cat="cat-${i}">${c.en}</button>`
+  ).join("");
+  nav.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.getElementById(btn.dataset.cat).scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  const list = document.getElementById("menu-list");
+  list.innerHTML = cats.map((c, i) => {
+    const items = drinks.filter(d => d.category_ja === c.ja);
+    return `
+      <section class="category-section" id="cat-${i}">
+        <div class="category-bar">${c.en}<span class="ja">${c.ja}</span></div>
+        ${items.map(renderDrinkCard).join("")}
+      </section>
+    `;
+  }).join("");
+
+  list.querySelectorAll(".drink-card").forEach(card => {
+    const id = card.dataset.id;
+    const drink = DRINKS.find(d => d.id === id);
+    const addBtn = card.querySelector(".add-btn");
+
+    function refreshAddBtn() {
+      const ready = isReady(drink, itemState[id]);
+      addBtn.classList.toggle("ready", ready);
+      addBtn.disabled = !ready;
+    }
+
+    const containerMinus = card.querySelector(".container-minus");
+    const containerPlus = card.querySelector(".container-plus");
+    const containerVal = card.querySelector(".container-value");
+    if (containerMinus) {
+      containerMinus.addEventListener("click", () => {
+        const st = itemState[id];
+        st.bottles = Math.max(0, st.bottles - 1);
+        containerVal.textContent = st.bottles;
+        refreshAddBtn();
+      });
+      containerPlus.addEventListener("click", () => {
+        const st = itemState[id];
+        st.bottles = Math.min(10, st.bottles + 1);
+        containerVal.textContent = st.bottles;
+        refreshAddBtn();
+      });
+    }
+
+    const glassMinus = card.querySelector(".glass-minus");
+    const glassPlus = card.querySelector(".glass-plus");
+    const glassVal = card.querySelector(".glass-value");
+    if (glassMinus) {
+      glassMinus.addEventListener("click", () => {
+        const st = itemState[id];
+        st.glasses = Math.max(0, st.glasses - 1);
+        glassVal.textContent = st.glasses;
+        refreshAddBtn();
+      });
+      glassPlus.addEventListener("click", () => {
+        const st = itemState[id];
+        st.glasses = Math.min(20, st.glasses + 1);
+        glassVal.textContent = st.glasses;
+        refreshAddBtn();
+      });
+    }
+
+    const qtyMinus = card.querySelector(".count-minus");
+    const qtyPlus = card.querySelector(".count-plus");
+    const qtyVal = card.querySelector(".count-value");
+    if (qtyMinus) {
+      qtyMinus.addEventListener("click", () => {
+        const st = itemState[id];
+        st.qty = Math.max(0, st.qty - 1);
+        qtyVal.textContent = st.qty;
+        refreshAddBtn();
+      });
+      qtyPlus.addEventListener("click", () => {
+        const st = itemState[id];
+        st.qty = Math.min(20, st.qty + 1);
+        qtyVal.textContent = st.qty;
+        refreshAddBtn();
+      });
+    }
+
+    card.querySelectorAll(".style-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        itemState[id].styleIndex = Number(opt.dataset.idx);
+        card.querySelectorAll(".style-option").forEach(o => o.classList.remove("selected"));
+        opt.classList.add("selected");
+      });
+    });
+
+    addBtn.addEventListener("click", () => {
+      addToCart(drink, addBtn);
+      const st = itemState[id];
+      st.qty = 0; st.bottles = 0; st.glasses = 0;
+      if (containerVal) containerVal.textContent = 0;
+      if (glassVal) glassVal.textContent = 0;
+      if (qtyVal) qtyVal.textContent = 0;
+      refreshAddBtn();
+    });
+  });
+
+  updateCartCount();
+  renderAgeNote();
+}
+
+function renderDrinkCard(d) {
+  const st = itemState[d.id];
+  let optionsHtml = "";
+
+  if (d.requiresGlassCount) {
+    const labels = VESSEL_LABELS[d.vesselType];
+    optionsHtml += `
+      <div class="option-row">
+        <span class="option-label">${labels.containerLabel}</span>
+        <div class="stepper">
+          <button type="button" class="container-minus">−</button>
+          <span class="container-value">${st.bottles}</span>
+          <button type="button" class="container-plus">＋</button>
+        </div>
+      </div>
+      <div class="option-row">
+        <span class="option-label">${labels.glassLabel}</span>
+        <div class="stepper">
+          <button type="button" class="glass-minus">−</button>
+          <span class="glass-value">${st.glasses}</span>
+          <button type="button" class="glass-plus">＋</button>
+        </div>
+      </div>`;
+  } else {
+    optionsHtml += `
+      <div class="option-row">
+        <span class="option-label">Quantity / 数量</span>
+        <div class="stepper">
+          <button type="button" class="count-minus">−</button>
+          <span class="count-value">${st.qty}</span>
+          <button type="button" class="count-plus">＋</button>
+        </div>
+      </div>`;
+  }
+
+  if (d.servingStyles.length) {
+    optionsHtml += `
+      <div class="option-row">
+        <span class="option-label">Serving style / 飲み方</span>
+        <div class="style-options">
+          ${d.servingStyles.map((s, i) =>
+            `<button type="button" class="style-option${i === st.styleIndex ? " selected" : ""}" data-idx="${i}">${s.en} / ${s.ja}</button>`
+          ).join("")}
+        </div>
+      </div>`;
+  }
+
+  const ready = isReady(d, st);
+  return `
+    <div class="drink-card" data-id="${d.id}">
+      <div class="drink-name-en">${d.name_en}</div>
+      <div class="drink-name-ja">${d.name_ja}</div>
+      ${d.desc_en ? `<div class="drink-desc">${d.desc_en}</div>` : ""}
+      <div class="drink-price">${yen(d.price)}</div>
+      ${optionsHtml ? `<div class="drink-options">${optionsHtml}</div>` : ""}
+      <button type="button" class="add-btn${ready ? " ready" : ""}"${ready ? "" : " disabled"}>Add to Order / 追加</button>
+    </div>
+  `;
+}
+
+function renderAgeNote() {
+  const note = document.getElementById("age-note");
+  if (ageConfirmed === "no") {
+    note.textContent = "Soft drinks only / ソフトドリンクのみ";
+  } else {
+    note.textContent = "";
+  }
+}
+
+/* ============================================================
+   Cart operations
+   ============================================================ */
+function addToCart(drink, btn) {
+  const st = itemState[drink.id];
+  if (!isReady(drink, st)) return;
+
+  const style = st.styleIndex !== null ? drink.servingStyles[st.styleIndex] : null;
+  const bottles = drink.requiresGlassCount ? st.bottles : null;
+  const glasses = drink.requiresGlassCount ? st.glasses : null;
+  const addedQty = drink.requiresGlassCount ? 1 : st.qty;
+  const key = cartKey(drink.id, bottles, glasses, style ? style.ja : null);
+
+  const existing = cart.find(item => item.key === key);
+  if (existing) {
+    existing.qty += addedQty;
+  } else {
+    cart.push({
+      key, id: drink.id,
+      name_ja: drink.name_ja, name_en: drink.name_en,
+      price: drink.price, qty: addedQty,
+      bottles, glasses, vesselType: drink.vesselType,
+      style_ja: style ? style.ja : null, style_en: style ? style.en : null
+    });
+  }
+
+  updateCartCount();
+
+  const original = btn.textContent;
+  btn.textContent = "Added! / 追加しました";
+  btn.classList.add("added");
+  setTimeout(() => { btn.textContent = original; btn.classList.remove("added"); }, 900);
+}
+
+function updateCartCount() {
+  document.getElementById("cart-count").textContent = totalCartCount();
+}
+
+function changeQty(key, delta) {
+  const item = cart.find(i => i.key === key);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    cart = cart.filter(i => i.key !== key);
+  }
+  renderOrder();
+  updateCartCount();
+}
+
+function removeItem(key) {
+  cart = cart.filter(i => i.key !== key);
+  renderOrder();
+  updateCartCount();
+}
+
+/* ============================================================
+   Rendering: order (customer) screen
+   ============================================================ */
+function renderOrder() {
+  const list = document.getElementById("order-list");
+  const showStaffBtn = document.getElementById("show-staff-btn");
+
+  if (cart.length === 0) {
+    list.innerHTML = `<p class="empty-note">Your order is empty / 注文はまだありません</p>`;
+    showStaffBtn.disabled = true;
+    return;
+  }
+  showStaffBtn.disabled = false;
+
+  list.innerHTML = cart.map(item => {
+    const opts = [];
+    if (item.bottles) {
+      const labels = VESSEL_LABELS[item.vesselType];
+      opts.push(`${item.bottles} ${pluralize(labels.containerUnitEn, item.bottles)} / ${item.bottles}${labels.containerUnitJa}`);
+    }
+    if (item.glasses) {
+      const labels = VESSEL_LABELS[item.vesselType];
+      opts.push(`${item.glasses} ${pluralize(labels.glassUnitEn, item.glasses)} / ${item.glasses}${labels.glassUnitJa}`);
+    }
+    if (item.style_en) opts.push(`${item.style_en} / ${item.style_ja}`);
+    return `
+      <div class="order-item" data-key="${item.key}">
+        <div class="order-item-main">
+          <div class="en">${item.name_en} <span class="ja">(${item.name_ja})</span></div>
+          ${opts.length ? `<div class="options">${opts.join(" · ")}</div>` : ""}
+        </div>
+        <div class="qty-control">
+          <button type="button" class="qty-minus">−</button>
+          <span>${item.qty}</span>
+          <button type="button" class="qty-plus">＋</button>
+          <button type="button" class="remove-btn">✕</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  list.querySelectorAll(".order-item").forEach(row => {
+    const key = row.dataset.key;
+    row.querySelector(".qty-minus").addEventListener("click", () => changeQty(key, -1));
+    row.querySelector(".qty-plus").addEventListener("click", () => changeQty(key, 1));
+    row.querySelector(".remove-btn").addEventListener("click", () => removeItem(key));
+  });
+}
+
+/* ============================================================
+   Rendering: staff screen
+   ============================================================ */
+function renderStaff() {
+  const list = document.getElementById("staff-list");
+  if (cart.length === 0) {
+    list.innerHTML = `<p class="empty-note">ご注文はありません</p>`;
+    return;
+  }
+  list.innerHTML = cart.map(item => {
+    const opts = [];
+    if (item.bottles) {
+      const labels = VESSEL_LABELS[item.vesselType];
+      const containerName = item.vesselType === "tokkuri" ? "徳利" : "本数";
+      opts.push(`${containerName}：${item.bottles}${labels.containerUnitJa}`);
+    }
+    if (item.glasses) {
+      const labels = VESSEL_LABELS[item.vesselType];
+      const glassName = item.vesselType === "tokkuri" ? "お猪口" : "グラス数";
+      opts.push(`${glassName}：${item.glasses}${labels.glassUnitJa}`);
+    }
+    if (item.style_ja) opts.push(`飲み方：${item.style_ja}`);
+    return `
+      <div class="staff-item">
+        <div class="staff-name">${item.name_ja} × ${item.qty}</div>
+        ${opts.length ? `<div class="staff-options">${opts.join(" / ")}</div>` : ""}
+      </div>
+    `;
+  }).join("") + `<p class="staff-note">この画面をスタッフにお見せください</p>`;
+}
+
+/* ============================================================
+   Wiring
+   ============================================================ */
+document.getElementById("age-yes").addEventListener("click", () => {
+  ageConfirmed = "yes";
+  sessionStorage.setItem("kawayodo_age_confirmed", "yes");
+  renderMenu();
+  showScreen("menu-screen");
+});
+
+document.getElementById("age-no").addEventListener("click", () => {
+  ageConfirmed = "no";
+  sessionStorage.setItem("kawayodo_age_confirmed", "no");
+  renderMenu();
+  showScreen("menu-screen");
+});
+
+document.getElementById("view-order-btn").addEventListener("click", () => {
+  renderOrder();
+  showScreen("order-screen");
+});
+
+document.getElementById("order-back-btn").addEventListener("click", () => {
+  showScreen("menu-screen");
+});
+
+document.getElementById("show-staff-btn").addEventListener("click", () => {
+  if (cart.length === 0) return;
+  renderStaff();
+  showScreen("staff-screen");
+});
+
+document.getElementById("staff-back-btn").addEventListener("click", () => {
+  showScreen("order-screen");
+});
+
+/* ============================================================
+   Init
+   ============================================================ */
+if (ageConfirmed === "yes" || ageConfirmed === "no") {
+  renderMenu();
+  showScreen("menu-screen");
+} else {
+  showScreen("age-gate");
+}
+</script>
+</body>
+</html>
