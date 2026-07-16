@@ -48,18 +48,49 @@ button {
   font-size: 22px;
   letter-spacing: 0.05em;
   color: var(--red);
-  margin: 0 0 24px;
+  margin: 0 0 4px;
 }
 
-.gate-card p.bilingual {
+/* ---------- Language switcher ---------- */
+.lang-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.lang-btn {
+  border: 1px solid var(--line);
+  background: var(--cream-dark);
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.lang-btn.active {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+
+.gate-card .lang-bar {
+  justify-content: center;
+  padding: 0;
+  margin-bottom: 18px;
+}
+
+.gate-subtitle {
+  font-size: 13px;
+  color: #6b6259;
+  margin: 0 0 18px;
+}
+
+.age-question {
   font-size: 18px;
   line-height: 1.6;
   margin-bottom: 28px;
-}
-
-.gate-card p.bilingual .ja {
-  font-size: 15px;
-  color: #6b6259;
 }
 
 .gate-buttons {
@@ -91,15 +122,23 @@ button {
 
 /* ---------- Site header ---------- */
 .site-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  padding: 14px 0 4px;
   background: var(--cream-dark);
   border-bottom: 3px solid var(--red);
   position: sticky;
   top: 0;
   z-index: 20;
+}
+
+.site-header-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+}
+
+.site-header .lang-bar {
+  padding: 10px 12px 4px;
 }
 
 .site-logo { width: 56px; }
@@ -133,7 +172,7 @@ button {
   background: #fff;
   border-bottom: 1px solid var(--line);
   position: sticky;
-  top: 74px;
+  top: 122px;
   z-index: 19;
   -webkit-overflow-scrolling: touch;
 }
@@ -158,7 +197,7 @@ button {
 /* ---------- Menu list ---------- */
 main#menu-list { padding: 4px 12px 90px; }
 
-.category-section { scroll-margin-top: 130px; margin-top: 22px; }
+.category-section { scroll-margin-top: 178px; margin-top: 22px; }
 
 .category-bar {
   background: var(--red);
@@ -170,8 +209,6 @@ main#menu-list { padding: 4px 12px 90px; }
   letter-spacing: 0.03em;
 }
 
-.category-bar .ja { font-weight: normal; font-size: 13px; margin-left: 8px; opacity: 0.9; }
-
 .drink-card {
   background: #fff;
   border: 1px solid var(--line);
@@ -181,7 +218,6 @@ main#menu-list { padding: 4px 12px 90px; }
 }
 
 .drink-name-en { font-size: 16px; font-weight: bold; }
-.drink-name-ja { font-size: 13px; color: #6b6259; margin-top: 1px; }
 .drink-desc { font-size: 13px; color: #55504a; margin-top: 6px; line-height: 1.4; }
 .drink-price { font-size: 15px; font-weight: bold; color: var(--red); margin-top: 8px; }
 
@@ -287,14 +323,29 @@ main#menu-list { padding: 4px 12px 90px; }
 
 /* ---------- Sub header (order / staff) ---------- */
 .sub-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  padding: 14px 0 4px;
   background: var(--cream-dark);
   border-bottom: 3px solid var(--red);
   position: sticky;
   top: 0;
+}
+
+.sub-header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.sub-header.staff-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.sub-header .lang-bar {
+  padding: 10px 12px 4px;
 }
 
 .sub-header h2 { margin: 0; font-size: 17px; color: var(--red); }
@@ -330,7 +381,6 @@ main#menu-list { padding: 4px 12px 90px; }
 }
 
 .order-item-main .en { font-size: 14px; font-weight: bold; }
-.order-item-main .en .ja { font-weight: normal; color: #6b6259; font-size: 12px; }
 .order-item-main .options { font-size: 12px; color: #6b6259; margin-top: 3px; }
 
 .qty-control {
