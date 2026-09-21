@@ -53,6 +53,7 @@
     <div class="lang-bar" id="lang-bar-order"></div>
   </header>
   <div id="order-list"></div>
+  <div id="timing-select"></div>
   <div class="order-actions">
     <button id="show-staff-btn" class="btn btn-primary"></button>
   </div>
@@ -76,7 +77,8 @@ const LANGUAGES = [
   { code:"ja",     label:"日本語" },
   { code:"ko",     label:"한국어" },
   { code:"zhHans", label:"简体中文" },
-  { code:"zhHant", label:"繁體中文" }
+  { code:"zhHant", label:"繁體中文" },
+  { code:"eo",     label:"Esperanto" }
 ];
 
 const UI_TEXT = {
@@ -94,7 +96,11 @@ const UI_TEXT = {
     quantity:"Quantity",
     servingStyle:"Serving style",
     emptyOrder:"Your order is empty",
-    showToStaffNote:"Please show this screen to staff"
+    showToStaffNote:"Please show this screen to staff",
+    servingTimingHeading:"When should we bring your drinks?",
+    timingFirst:"Before the meal",
+    timingWith:"With the meal",
+    timingRequired:"Please choose one to continue"
   },
   ja: {
     headerSubtitle:"ドリンクメニュー",
@@ -110,7 +116,11 @@ const UI_TEXT = {
     quantity:"数量",
     servingStyle:"飲み方",
     emptyOrder:"注文はまだありません",
-    showToStaffNote:"この画面をスタッフにお見せください"
+    showToStaffNote:"この画面をスタッフにお見せください",
+    servingTimingHeading:"飲み物をお持ちするタイミング",
+    timingFirst:"食事より先に",
+    timingWith:"食事と一緒に",
+    timingRequired:"選択してください"
   },
   ko: {
     headerSubtitle:"음료 메뉴",
@@ -126,7 +136,11 @@ const UI_TEXT = {
     quantity:"수량",
     servingStyle:"마시는 방법",
     emptyOrder:"아직 주문한 항목이 없습니다",
-    showToStaffNote:"이 화면을 직원에게 보여주세요"
+    showToStaffNote:"이 화면을 직원에게 보여주세요",
+    servingTimingHeading:"음료를 언제 가져다 드릴까요?",
+    timingFirst:"식사 전에",
+    timingWith:"식사와 함께",
+    timingRequired:"선택해 주세요"
   },
   zhHans: {
     headerSubtitle:"饮品菜单",
@@ -142,7 +156,11 @@ const UI_TEXT = {
     quantity:"数量",
     servingStyle:"饮用方式",
     emptyOrder:"您的订单是空的",
-    showToStaffNote:"请将此画面出示给店员"
+    showToStaffNote:"请将此画面出示给店员",
+    servingTimingHeading:"饮品何时上桌？",
+    timingFirst:"先于餐点上桌",
+    timingWith:"与餐点一起上桌",
+    timingRequired:"请选择"
   },
   zhHant: {
     headerSubtitle:"飲品菜單",
@@ -158,33 +176,57 @@ const UI_TEXT = {
     quantity:"數量",
     servingStyle:"飲用方式",
     emptyOrder:"您的訂單是空的",
-    showToStaffNote:"請將此畫面出示給店員"
+    showToStaffNote:"請將此畫面出示給店員",
+    servingTimingHeading:"飲品何時上桌？",
+    timingFirst:"先於餐點上桌",
+    timingWith:"與餐點一起上桌",
+    timingRequired:"請選擇"
+  },
+  eo: {
+    headerSubtitle:"Trinkaĵa Menuo",
+    ageQuestion:"Ĉu vi estas 20-jaraĝa aŭ pli aĝa?",
+    yes:"Jes", no:"Ne",
+    softDrinksOnly:"Nur nealkoholaj trinkaĵoj",
+    viewOrder:"Vidi mendon",
+    yourOrder:"Via mendo",
+    back:"Reen",
+    showToStaff:"Montri al la personaro",
+    addToOrder:"Aldoni al mendo",
+    added:"Aldonita!",
+    quantity:"Kvanto",
+    servingStyle:"Maniero de servado",
+    emptyOrder:"Via mendo estas malplena",
+    showToStaffNote:"Bonvolu montri ĉi tiun ekranon al la personaro",
+    servingTimingHeading:"Kiam ni portu viajn trinkaĵojn?",
+    timingFirst:"Antaŭ la manĝo",
+    timingWith:"Kune kun la manĝo",
+    timingRequired:"Bonvolu elekti unu por daŭrigi"
   }
 };
 
 const CATEGORIES = {
-  wine:      { en:"Wine",             ja:"ワイン",       ko:"와인",           zhHans:"葡萄酒",   zhHant:"葡萄酒" },
-  sparkling: { en:"Sparkling",        ja:"スパークリング", ko:"스파클링",       zhHans:"起泡酒",   zhHant:"氣泡酒" },
-  sake:      { en:"Sake",             ja:"清酒",         ko:"청주(사케)",     zhHans:"清酒",     zhHant:"清酒" },
-  reishu:    { en:"Chilled Sake",     ja:"冷酒",         ko:"냉주",           zhHans:"冷酒",     zhHant:"冷酒" },
-  beer:      { en:"Beer & Others",    ja:"ビール他",      ko:"맥주 외",        zhHans:"啤酒等",   zhHant:"啤酒等" },
-  shochu:    { en:"Shochu",           ja:"焼酎",         ko:"소주(쇼츄)",     zhHans:"烧酒",     zhHant:"燒酒" },
-  soft:      { en:"Soft Drinks",      ja:"ソフトドリンク", ko:"소프트 드링크",   zhHans:"软饮料",   zhHant:"軟飲料" }
+  wine:      { en:"Wine",             ja:"ワイン",       ko:"와인",           zhHans:"葡萄酒",   zhHant:"葡萄酒", eo:"Vino" },
+  sparkling: { en:"Sparkling",        ja:"スパークリング", ko:"스파클링",       zhHans:"起泡酒",   zhHant:"氣泡酒", eo:"Spumvino" },
+  sake:      { en:"Sake",             ja:"清酒",         ko:"청주(사케)",     zhHans:"清酒",     zhHant:"清酒", eo:"Sakeo" },
+  reishu:    { en:"Chilled Sake",     ja:"冷酒",         ko:"냉주",           zhHans:"冷酒",     zhHant:"冷酒", eo:"Malvarma sakeo" },
+  beer:      { en:"Beer & Others",    ja:"ビール他",      ko:"맥주 외",        zhHans:"啤酒等",   zhHant:"啤酒等", eo:"Biero kaj aliaj" },
+  shochu:    { en:"Shochu",           ja:"焼酎",         ko:"소주(쇼츄)",     zhHans:"烧酒",     zhHant:"燒酒", eo:"Ŝoĉuo" },
+  soft:      { en:"Soft Drinks",      ja:"ソフトドリンク", ko:"소프트 드링크",   zhHans:"软饮料",   zhHant:"軟飲料", eo:"Nealkoholaj trinkaĵoj" }
 };
 
 /* Bottle/tokkuri (shared container) + glass/ochoko (individual serving) labels per vessel type */
 const VESSEL_LABELS = {
   bottle: {
-    containerLabel: { en:"Bottles",              ja:"本数",     ko:"병 수",           zhHans:"瓶数",       zhHant:"瓶數" },
-    glassLabel:     { en:"Glasses",               ja:"グラス数", ko:"잔 수",           zhHans:"杯数",       zhHant:"杯數" },
-    containerUnit:  { en:"bottle",                ja:"本",       ko:"병",              zhHans:"瓶",         zhHant:"瓶" },
-    glassUnit:      { en:"glass",                 ja:"杯",       ko:"잔",              zhHans:"杯",         zhHant:"杯" }
+    containerLabel: { en:"Bottles",              ja:"本数",     ko:"병 수",           zhHans:"瓶数",       zhHant:"瓶數", eo:"Nombro de boteloj" },
+    glassLabel:     { en:"Glasses",               ja:"グラス数", ko:"잔 수",           zhHans:"杯数",       zhHant:"杯數", eo:"Nombro de glasoj" },
+    containerUnit:  { en:"bottle",                ja:"本",       ko:"병",              zhHans:"瓶",         zhHant:"瓶", eo:"botelo" },
+    glassUnit:      { en:"glass",                 ja:"杯",       ko:"잔",              zhHans:"杯",         zhHant:"杯", eo:"glaso" }
   },
   tokkuri: {
-    containerLabel: { en:"Tokkuri (decanter)",    ja:"徳利数",   ko:"도쿠리(술병) 수", zhHans:"德利（酒壶）数", zhHant:"德利（酒壺）數" },
-    glassLabel:     { en:"Ochoko (cup)",          ja:"お猪口数", ko:"오쵸코(잔) 수",   zhHans:"猪口（酒杯）数", zhHant:"豬口（酒杯）數" },
-    containerUnit:  { en:"tokkuri",                ja:"本",       ko:"병",              zhHans:"壶",         zhHant:"壺" },
-    glassUnit:      { en:"ochoko",                 ja:"杯",       ko:"잔",              zhHans:"杯",         zhHant:"杯" }
+    containerLabel: { en:"Tokkuri (decanter)",    ja:"徳利数",   ko:"도쿠리(술병) 수", zhHans:"德利（酒壶）数", zhHant:"德利（酒壺）數", eo:"Nombro de tokkurioj (karafoj)" },
+    glassLabel:     { en:"Ochoko (cup)",          ja:"お猪口数", ko:"오쵸코(잔) 수",   zhHans:"猪口（酒杯）数", zhHant:"豬口（酒杯）數", eo:"Nombro de ochokoj (tasetoj)" },
+    containerUnit:  { en:"tokkuri",                ja:"本",       ko:"병",              zhHans:"壶",         zhHant:"壺", eo:"tokkurio" },
+    glassUnit:      { en:"ochoko",                 ja:"杯",       ko:"잔",              zhHans:"杯",         zhHant:"杯", eo:"ochoko" }
   }
 };
 const PLURAL_FORMS = { bottle:"bottles", glass:"glasses", tokkuri:"tokkuri", ochoko:"ochoko" };
@@ -192,17 +234,19 @@ function pluralize(word, n) {
   return n === 1 ? word : (PLURAL_FORMS[word] || word + "s");
 }
 function formatVesselCount(n, unit, lang) {
-  return lang === "en" ? (n + " " + pluralize(unit.en, n)) : (n + unit[lang]);
+  if (lang === "en") return n + " " + pluralize(unit.en, n);
+  if (lang === "eo") return n + " " + (n === 1 ? unit.eo : unit.eo + "j");
+  return n + unit[lang];
 }
 
 /* Shared serving-style options */
-const STYLE_ATSUKAN   = { en:"Hot (Atsukan)",          ja:"熱燗",   ko:"뜨겁게 (아츠캉)",   zhHans:"热酒（Atsukan）", zhHant:"熱酒（Atsukan）" };
-const STYLE_HIYA       = { en:"Cold (Hiya)",            ja:"ひや",   ko:"차갑게 (히야)",     zhHans:"冷酒（Hiya）",    zhHant:"冷酒（Hiya）" };
-const STYLE_ROCK        = { en:"On the Rocks",           ja:"ロック", ko:"온더락",           zhHans:"加冰",           zhHant:"加冰" };
-const STYLE_STRAIGHT    = { en:"Straight (Neat)",        ja:"ストレート", ko:"스트레이트",   zhHans:"纯饮",           zhHant:"純飲" };
-const STYLE_MIZUWARI_U  = { en:"With Water (Mizuwari)",  ja:"水割り", ko:"미즈와리 (물 타서)", zhHans:"兑水（水割り）", zhHant:"兌水（水割り）" };
-const STYLE_MIZUWARI    = { en:"With Water",             ja:"水割り", ko:"미즈와리 (물 타서)", zhHans:"兑水",          zhHant:"兌水" };
-const STYLE_OYUWARI      = { en:"With Hot Water",         ja:"お湯割り", ko:"오유와리 (뜨거운 물 타서)", zhHans:"兑热水", zhHant:"兌熱水" };
+const STYLE_ATSUKAN   = { en:"Hot (Atsukan)",          ja:"熱燗",   ko:"뜨겁게 (아츠캉)",   zhHans:"热酒（Atsukan）", zhHant:"熱酒（Atsukan）", eo:"Varma (Atsukan)" };
+const STYLE_HIYA       = { en:"Cold (Hiya)",            ja:"ひや",   ko:"차갑게 (히야)",     zhHans:"冷酒（Hiya）",    zhHant:"冷酒（Hiya）", eo:"Malvarma (Hiya)" };
+const STYLE_ROCK        = { en:"On the Rocks",           ja:"ロック", ko:"온더락",           zhHans:"加冰",           zhHant:"加冰", eo:"Kun glacio" };
+const STYLE_STRAIGHT    = { en:"Straight (Neat)",        ja:"ストレート", ko:"스트레이트",   zhHans:"纯饮",           zhHant:"純飲", eo:"Pura (senmiksa)" };
+const STYLE_MIZUWARI_U  = { en:"With Water (Mizuwari)",  ja:"水割り", ko:"미즈와리 (물 타서)", zhHans:"兑水（水割り）", zhHant:"兌水（水割り）", eo:"Kun akvo (Mizuwari)" };
+const STYLE_MIZUWARI    = { en:"With Water",             ja:"水割り", ko:"미즈와리 (물 타서)", zhHans:"兑水",          zhHant:"兌水", eo:"Kun akvo" };
+const STYLE_OYUWARI      = { en:"With Hot Water",         ja:"お湯割り", ko:"오유와리 (뜨거운 물 타서)", zhHans:"兑热水", zhHant:"兌熱水", eo:"Kun varma akvo" };
 
 const SAKE_STYLES   = [STYLE_ATSUKAN, STYLE_HIYA];
 const UMESHU_STYLES = [STYLE_ROCK, STYLE_STRAIGHT, STYLE_MIZUWARI_U];
@@ -214,144 +258,148 @@ const SHOCHU_STYLES = [STYLE_ROCK, STYLE_STRAIGHT, STYLE_MIZUWARI, STYLE_OYUWARI
 const DRINKS = [
   // ---- Wine ----
   { id:"wine-yellowtail-cab", category:"wine", slipName:"赤ワイン",
-    name:{ en:"Yellow Tail Cabernet Sauvignon (Red, Australia) 187ml", ja:"イエローテイル カベルネ・ソーヴィニヨン(赤)（オーストラリア）187ml", ko:"옐로우테일 까베르네 소비뇽 (레드, 호주) 187ml", zhHans:"黄尾袋鼠 赤霞珠红葡萄酒（红，澳大利亚）187ml", zhHant:"黃尾袋鼠 卡本內蘇維濃紅酒（紅，澳洲）187ml" },
-    desc:{ en:"Smooth and full-bodied, with rich, deep fruit flavor.", ja:"口当たりはなめらかながらボリュームがあり，果実味にあふれた奥行きのある味わい", ko:"부드럽고 풍부한 바디감에 깊은 과일 향이 느껴집니다.", zhHans:"口感顺滑饱满，果香浓郁深厚。", zhHant:"口感順滑飽滿，果香濃郁深厚。" },
+    name:{ en:"Yellow Tail Cabernet Sauvignon (Red, Australia) 187ml", ja:"イエローテイル カベルネ・ソーヴィニヨン(赤)（オーストラリア）187ml", ko:"옐로우테일 까베르네 소비뇽 (레드, 호주) 187ml", zhHans:"黄尾袋鼠 赤霞珠红葡萄酒（红，澳大利亚）187ml", zhHant:"黃尾袋鼠 卡本內蘇維濃紅酒（紅，澳洲）187ml", eo:"Yellow Tail Cabernet Sauvignon (ruĝa, Aŭstralio) 187ml" },
+    desc:{ en:"Smooth and full-bodied, with rich, deep fruit flavor.", ja:"口当たりはなめらかながらボリュームがあり，果実味にあふれた奥行きのある味わい", ko:"부드럽고 풍부한 바디감에 깊은 과일 향이 느껴집니다.", zhHans:"口感顺滑饱满，果香浓郁深厚。", zhHant:"口感順滑飽滿，果香濃郁深厚。", eo:"Glata kaj plenkorpa, kun riĉa kaj profunda frukta gusto." },
     price:1160, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"wine-concha-chardonnay", category:"wine", slipName:"白ワイン",
-    name:{ en:"Concha y Toro Sunrise Chardonnay (White, Chile) 250ml", ja:"コンチャ・イ・トロ サンライズ シャルドネ(白)（チリ）250ml", ko:"콘차 이 토로 선라이즈 샤르도네 (화이트, 칠레) 250ml", zhHans:"干露 日出霞多丽白葡萄酒（白，智利）250ml", zhHant:"康柯拉 日出夏多內白酒（白，智利）250ml" },
-    desc:{ en:"Fresh acidity beautifully balanced with rich fruit aroma.", ja:"フレッシュな酸味と豊かな果実香が高いレベルでバランスを取っているワインです．", ko:"상큼한 산미와 풍부한 과일 향이 조화롭게 어우러집니다.", zhHans:"清新的酸度与浓郁果香完美平衡。", zhHant:"清新的酸度與濃郁果香完美平衡。" },
+    name:{ en:"Concha y Toro Sunrise Chardonnay (White, Chile) 250ml", ja:"コンチャ・イ・トロ サンライズ シャルドネ(白)（チリ）250ml", ko:"콘차 이 토로 선라이즈 샤르도네 (화이트, 칠레) 250ml", zhHans:"干露 日出霞多丽白葡萄酒（白，智利）250ml", zhHant:"康柯拉 日出夏多內白酒（白，智利）250ml", eo:"Concha y Toro Sunrise Chardonnay (blanka, Ĉilio) 250ml" },
+    desc:{ en:"Fresh acidity beautifully balanced with rich fruit aroma.", ja:"フレッシュな酸味と豊かな果実香が高いレベルでバランスを取っているワインです．", ko:"상큼한 산미와 풍부한 과일 향이 조화롭게 어우러집니다.", zhHans:"清新的酸度与浓郁果香完美平衡。", zhHant:"清新的酸度與濃郁果香完美平衡。", eo:"Freŝa acideco bele ekvilibrigita kun riĉa frukta aromo." },
     price:1160, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
 
   // ---- Sparkling ----
   { id:"sparkling-freixenet", category:"sparkling", slipName:"スパークリング",
-    name:{ en:"Freixenet Cordon Negro Brut 200ml", ja:"フレシネ コルドン・ネグロ ブリュット 200ml", ko:"프레시넷 코르동 네그로 브뤼 200ml", zhHans:"菲斯奈特 黑色系列干型气泡酒 200ml", zhHant:"菲斯奈特 黑色系列 Brut 氣泡酒 200ml" },
-    desc:{ en:"A dry sparkling wine with fruity aroma and gorgeous flavor.", ja:"フルーティーな香り，華やかな風味の辛口スパークリングです．", ko:"과일 향이 풍부하고 화려한 맛의 드라이 스파클링 와인입니다.", zhHans:"干型气泡酒，果香怡人，口感华丽。", zhHant:"乾型氣泡酒，果香怡人，口感華麗。" },
+    name:{ en:"Freixenet Cordon Negro Brut 200ml", ja:"フレシネ コルドン・ネグロ ブリュット 200ml", ko:"프레시넷 코르동 네그로 브뤼 200ml", zhHans:"菲斯奈特 黑色系列干型气泡酒 200ml", zhHant:"菲斯奈特 黑色系列 Brut 氣泡酒 200ml", eo:"Freixenet Cordon Negro Brut 200ml" },
+    desc:{ en:"A dry sparkling wine with fruity aroma and gorgeous flavor.", ja:"フルーティーな香り，華やかな風味の辛口スパークリングです．", ko:"과일 향이 풍부하고 화려한 맛의 드라이 스파클링 와인입니다.", zhHans:"干型气泡酒，果香怡人，口感华丽。", zhHant:"乾型氣泡酒，果香怡人，口感華麗。", eo:"Seka spumvino kun frukta aromo kaj bonega gusto." },
     price:1430, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
 
   // ---- Sake (seishu) ----
   { id:"sake-kikumasamune", category:"sake", slipName:"菊正宗（清酒）",
-    name:{ en:"Kikumasamune (Hyogo) Dry", ja:"菊正宗（兵庫）辛口", ko:"기쿠마사무네 (효고) 드라이", zhHans:"菊正宗（兵库）辛口", zhHant:"菊正宗（兵庫）辛口" },
-    desc:{ en:"Brewed with Nada's famous water and Yamada Nishiki rice — crisp yet deep in flavor.", ja:"灘の宮水と山田錦が端麗でありながら深い味わいを醸し出します．", ko:"나다의 명수와 야마다니시키 쌀로 빚어 깔끔하면서도 깊은 맛을 자랑합니다.", zhHans:"选用滩地名水与山田锦米酿造，口感清爽又不失深邃。", zhHant:"選用灘地名水與山田錦米釀造，口感清爽又不失深邃。" },
+    name:{ en:"Kikumasamune (Hyogo) Dry", ja:"菊正宗（兵庫）辛口", ko:"기쿠마사무네 (효고) 드라이", zhHans:"菊正宗（兵库）辛口", zhHant:"菊正宗（兵庫）辛口", eo:"Kikumasamune (Hyogo) seka" },
+    desc:{ en:"Brewed with Nada's famous water and Yamada Nishiki rice — crisp yet deep in flavor.", ja:"灘の宮水と山田錦が端麗でありながら深い味わいを醸し出します．", ko:"나다의 명수와 야마다니시키 쌀로 빚어 깔끔하면서도 깊은 맛을 자랑합니다.", zhHans:"选用滩地名水与山田锦米酿造，口感清爽又不失深邃。", zhHant:"選用灘地名水與山田錦米釀造，口感清爽又不失深邃。", eo:"Farita per la fama akvo de Nada kaj rizo Yamada Nishiki — freŝa, tamen profunda gusto." },
     price:700, requiresGlassCount:true, vesselType:"tokkuri", servingStyles:SAKE_STYLES },
   { id:"sake-daishichi", category:"sake", slipName:"きもと",
-    name:{ en:"Daishichi Junmai Kimoto (Fukushima)", ja:"大七 純米生酛（福島）", ko:"다이시치 준마이 기모토 (후쿠시마)", zhHans:"大七 纯米生酛（福岛）", zhHant:"大七 純米生酛（福島）" },
-    desc:{ en:"Rich, deep umami with an elegant aroma and clean finish.", ja:"豊かなコクの旨味，上品な香りで後味のキレ良し．", ko:"깊고 진한 감칠맛과 우아한 향, 깔끔한 여운이 특징입니다.", zhHans:"浓郁深厚的鲜味，香气优雅，余韵清爽。", zhHant:"濃郁深厚的鮮味，香氣優雅，餘韻清爽。" },
+    name:{ en:"Daishichi Junmai Kimoto (Fukushima)", ja:"大七 純米生酛（福島）", ko:"다이시치 준마이 기모토 (후쿠시마)", zhHans:"大七 纯米生酛（福岛）", zhHant:"大七 純米生酛（福島）", eo:"Daishichi Junmai Kimoto (Fukushima)" },
+    desc:{ en:"Rich, deep umami with an elegant aroma and clean finish.", ja:"豊かなコクの旨味，上品な香りで後味のキレ良し．", ko:"깊고 진한 감칠맛과 우아한 향, 깔끔한 여운이 특징입니다.", zhHans:"浓郁深厚的鲜味，香气优雅，余韵清爽。", zhHant:"濃郁深厚的鮮味，香氣優雅，餘韻清爽。", eo:"Riĉa, profunda umami kun eleganta aromo kaj pura postgusto." },
     price:750, requiresGlassCount:true, vesselType:"tokkuri", servingStyles:SAKE_STYLES },
   { id:"sake-kubota", category:"sake", slipName:"久保田",
-    name:{ en:"Kubota Senju (Niigata)", ja:"久保田（新潟）千寿", ko:"구보타 센주 (니가타)", zhHans:"久保田 千寿（新潟）", zhHant:"久保田 千壽（新潟）" },
-    desc:{ en:"A clean, dry sake with an elegant, gentle aroma.", ja:"飲み口のスッキリとした辛口．上品でやさしい香味．", ko:"깔끔하고 드라이하며 우아하고 은은한 향이 특징인 사케입니다.", zhHans:"口感清爽干净，香气优雅柔和。", zhHant:"口感清爽乾淨，香氣優雅柔和。" },
+    name:{ en:"Kubota Senju (Niigata)", ja:"久保田（新潟）千寿", ko:"구보타 센주 (니가타)", zhHans:"久保田 千寿（新潟）", zhHant:"久保田 千壽（新潟）", eo:"Kubota Senju (Niigata)" },
+    desc:{ en:"A clean, dry sake with an elegant, gentle aroma.", ja:"飲み口のスッキリとした辛口．上品でやさしい香味．", ko:"깔끔하고 드라이하며 우아하고 은은한 향이 특징인 사케입니다.", zhHans:"口感清爽干净，香气优雅柔和。", zhHant:"口感清爽乾淨，香氣優雅柔和。", eo:"Pura, seka sakeo kun eleganta kaj milda aromo." },
     price:770, requiresGlassCount:true, vesselType:"tokkuri", servingStyles:SAKE_STYLES },
 
   // ---- Chilled sake / umeshu (reishu) ----
   { id:"reishu-umeshu", category:"reishu", slipName:"梅酒",
-    name:{ en:"Plum Wine (Glass)", ja:"梅酒（グラス）", ko:"우메슈 매실주 (잔)", zhHans:"梅酒（杯装）", zhHant:"梅酒（杯裝）" },
-    desc:{ en:"Handmade Shiratama plum wine.", ja:"白玉の手作り梅酒です．", ko:"수제 시라타마 매실주입니다.", zhHans:"手工酿造的白玉梅酒。", zhHant:"手工釀造的白玉梅酒。" },
+    name:{ en:"Plum Wine (Glass)", ja:"梅酒（グラス）", ko:"우메슈 매실주 (잔)", zhHans:"梅酒（杯装）", zhHant:"梅酒（杯裝）", eo:"Prunvino (glaso)" },
+    desc:{ en:"Handmade Shiratama plum wine.", ja:"白玉の手作り梅酒です．", ko:"수제 시라타마 매실주입니다.", zhHans:"手工酿造的白玉梅酒。", zhHant:"手工釀造的白玉梅酒。", eo:"Mane farita prunvino de Shiratama." },
     price:620, requiresGlassCount:false, servingStyles:UMESHU_STYLES },
   { id:"reishu-kikumasamune", category:"reishu", slipName:"菊正宗（冷酒）",
-    name:{ en:"Kikumasamune (Hyogo) Dry / Namachozo / 180ml", ja:"菊正宗（兵庫）辛口／生貯蔵酒／180ml", ko:"기쿠마사무네 (효고) 드라이 / 나마초조슈 / 180ml", zhHans:"菊正宗（兵库）辛口／生贮藏酒／180ml", zhHant:"菊正宗（兵庫）辛口／生貯藏酒／180ml" },
-    desc:{ en:"Whole-grain brewing draws out the rice's natural umami — a crisp, full-flavored chilled sake.", ja:"丸米仕込みでお米本来のうまみを十分引き出した「押し味」のある冷酒です．", ko:"쌀알을 통째로 사용한 양조법으로 쌀 본연의 감칠맛을 살린, 산뜻하고 풍미 가득한 냉주입니다.", zhHans:"整粒酿造工艺充分释放米的天然鲜味，口感清爽、风味十足的冷酒。", zhHant:"整粒釀造工藝充分釋放米的天然鮮味，口感清爽、風味十足的冷酒。" },
+    name:{ en:"Kikumasamune (Hyogo) Dry / Namachozo / 180ml", ja:"菊正宗（兵庫）辛口／生貯蔵酒／180ml", ko:"기쿠마사무네 (효고) 드라이 / 나마초조슈 / 180ml", zhHans:"菊正宗（兵库）辛口／生贮藏酒／180ml", zhHant:"菊正宗（兵庫）辛口／生貯藏酒／180ml", eo:"Kikumasamune (Hyogo) seka / Namachozo / 180ml" },
+    desc:{ en:"Whole-grain brewing draws out the rice's natural umami — a crisp, full-flavored chilled sake.", ja:"丸米仕込みでお米本来のうまみを十分引き出した「押し味」のある冷酒です．", ko:"쌀알을 통째로 사용한 양조법으로 쌀 본연의 감칠맛을 살린, 산뜻하고 풍미 가득한 냉주입니다.", zhHans:"整粒酿造工艺充分释放米的天然鲜味，口感清爽、风味十足的冷酒。", zhHant:"整粒釀造工藝充分釋放米的天然鮮味，口感清爽、風味十足的冷酒。", eo:"Ŝlifado de la tuta rizgrajno elvokas la naturan umami de la rizo — freŝa kaj plengusta malvarma sakeo." },
     price:700, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"reishu-suishin", category:"reishu", slipName:"酔心",
-    name:{ en:"Suishin (Hiroshima) Sweet / Tokubetsu Honjozo / 300ml", ja:"酔心（広島）甘口／特別本醸造／300ml", ko:"스이신 (히로시마) 스위트 / 도쿠베츠 혼조조 / 300ml", zhHans:"醉心（广岛）甘口／特别本酿造／300ml", zhHant:"醉心（廣島）甘口／特別本釀造／300ml" },
-    desc:{ en:"Consistently elegant acidity with a refreshing taste you won't tire of.", ja:"スッキリとした酸味は常に上品さを与え，爽やかな口当たりは飲みあきしません．", ko:"한결같이 우아한 산미와 질리지 않는 상쾌한 맛이 특징입니다.", zhHans:"始终如一的优雅酸度，口感清爽不腻。", zhHant:"始終如一的優雅酸度，口感清爽不膩。" },
+    name:{ en:"Suishin (Hiroshima) Sweet / Tokubetsu Honjozo / 300ml", ja:"酔心（広島）甘口／特別本醸造／300ml", ko:"스이신 (히로시마) 스위트 / 도쿠베츠 혼조조 / 300ml", zhHans:"醉心（广岛）甘口／特别本酿造／300ml", zhHant:"醉心（廣島）甘口／特別本釀造／300ml", eo:"Suishin (Hiroshima) dolĉa / Tokubetsu Honjozo / 300ml" },
+    desc:{ en:"Consistently elegant acidity with a refreshing taste you won't tire of.", ja:"スッキリとした酸味は常に上品さを与え，爽やかな口当たりは飲みあきしません．", ko:"한결같이 우아한 산미와 질리지 않는 상쾌한 맛이 특징입니다.", zhHans:"始终如一的优雅酸度，口感清爽不腻。", zhHant:"始終如一的優雅酸度，口感清爽不膩。", eo:"Ĉiam eleganta acideco kaj refreŝiga gusto, kiun oni neniam enuiĝas trinki." },
     price:990, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"reishu-asahiyama", category:"reishu", slipName:"朝日山",
-    name:{ en:"Asahiyama (Niigata) Dry / Tokubetsu Honjozo / 300ml", ja:"朝日山（新潟）辛口／特別本醸造／300ml", ko:"아사히야마 (니가타) 드라이 / 도쿠베츠 혼조조 / 300ml", zhHans:"朝日山（新潟）辛口／特别本酿造／300ml", zhHant:"朝日山（新潟）辛口／特別本釀造／300ml" },
-    desc:{ en:"Unpasteurized after pressing — smooth and easy to drink chilled.", ja:"絞ってからの火入（加熱処理）を行わない本生酒です．口当たりの良い冷酒です．", ko:"압착 후 살균하지 않아 부드럽고 시원하게 마시기 좋습니다.", zhHans:"压榨后未经加热杀菌，口感顺滑，冰镇饮用格外顺口。", zhHant:"壓榨後未經加熱殺菌，口感順滑，冰鎮飲用格外順口。" },
+    name:{ en:"Asahiyama (Niigata) Dry / Tokubetsu Honjozo / 300ml", ja:"朝日山（新潟）辛口／特別本醸造／300ml", ko:"아사히야마 (니가타) 드라이 / 도쿠베츠 혼조조 / 300ml", zhHans:"朝日山（新潟）辛口／特别本酿造／300ml", zhHant:"朝日山（新潟）辛口／特別本釀造／300ml", eo:"Asahiyama (Niigata) seka / Tokubetsu Honjozo / 300ml" },
+    desc:{ en:"Unpasteurized after pressing — smooth and easy to drink chilled.", ja:"絞ってからの火入（加熱処理）を行わない本生酒です．口当たりの良い冷酒です．", ko:"압착 후 살균하지 않아 부드럽고 시원하게 마시기 좋습니다.", zhHans:"压榨后未经加热杀菌，口感顺滑，冰镇饮用格外顺口。", zhHant:"壓榨後未經加熱殺菌，口感順滑，冰鎮飲用格外順口。", eo:"Ne pasteŭrizita post premado — glata kaj facile trinkebla malvarme." },
     price:1330, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"reishu-nishinoseki", category:"reishu", slipName:"西の関",
-    name:{ en:"Nishinoseki (Oita) Dry / Tokubetsu Honjozo / 300ml", ja:"西の関（大分）辛口／特別本醸造／300ml", ko:"니시노세키 (오이타) 드라이 / 도쿠베츠 혼조조 / 300ml", zhHans:"西之关（大分）辛口／特别本酿造／300ml", zhHant:"西之關（大分）辛口／特別本釀造／300ml" },
-    desc:{ en:"Highly aromatic with a rich, savory taste.", ja:"香り高く芳ばしい濃厚な旨口．", ko:"향이 풍부하고 진하고 감칠맛 나는 맛이 특징입니다.", zhHans:"香气浓郁，滋味醇厚鲜美。", zhHant:"香氣濃郁，滋味醇厚鮮美。" },
+    name:{ en:"Nishinoseki (Oita) Dry / Tokubetsu Honjozo / 300ml", ja:"西の関（大分）辛口／特別本醸造／300ml", ko:"니시노세키 (오이타) 드라이 / 도쿠베츠 혼조조 / 300ml", zhHans:"西之关（大分）辛口／特别本酿造／300ml", zhHant:"西之關（大分）辛口／特別本釀造／300ml", eo:"Nishinoseki (Oita) seka / Tokubetsu Honjozo / 300ml" },
+    desc:{ en:"Highly aromatic with a rich, savory taste.", ja:"香り高く芳ばしい濃厚な旨口．", ko:"향이 풍부하고 진하고 감칠맛 나는 맛이 특징입니다.", zhHans:"香气浓郁，滋味醇厚鲜美。", zhHant:"香氣濃郁，滋味醇厚鮮美。", eo:"Tre aroma kun riĉa, bongusta gusto." },
     price:1520, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"reishu-ugonotsuki", category:"reishu", slipName:"雨後の月",
-    name:{ en:"Ugonotsuki (Hiroshima) Dry / Daiginjo / 300ml", ja:"雨後の月（広島）辛口／大吟醸／300ml", ko:"우고노츠키 (히로시마) 드라이 / 다이긴조 / 300ml", zhHans:"雨后之月（广岛）辛口／大吟酿／300ml", zhHant:"雨後之月（廣島）辛口／大吟釀／300ml" },
-    desc:{ en:"Crisp and dry with a clean finish — winner of numerous awards at home and abroad.", ja:"キリッと辛口．すっきりとした味わい．国内外で数々の賞を受賞．", ko:"산뜻하고 드라이하며 깔끔한 여운이 특징으로, 국내외 각종 대회에서 수상한 명주입니다.", zhHans:"口感清爽干冽，余韵干净，曾在国内外屡获殊荣。", zhHant:"口感清爽乾冽，餘韻乾淨，曾在國內外屢獲殊榮。" },
+    name:{ en:"Ugonotsuki (Hiroshima) Dry / Daiginjo / 300ml", ja:"雨後の月（広島）辛口／大吟醸／300ml", ko:"우고노츠키 (히로시마) 드라이 / 다이긴조 / 300ml", zhHans:"雨后之月（广岛）辛口／大吟酿／300ml", zhHant:"雨後之月（廣島）辛口／大吟釀／300ml", eo:"Ugonotsuki (Hiroshima) seka / Daiginjo / 300ml" },
+    desc:{ en:"Crisp and dry with a clean finish — winner of numerous awards at home and abroad.", ja:"キリッと辛口．すっきりとした味わい．国内外で数々の賞を受賞．", ko:"산뜻하고 드라이하며 깔끔한 여운이 특징으로, 국내외 각종 대회에서 수상한 명주입니다.", zhHans:"口感清爽干冽，余韵干净，曾在国内外屡获殊荣。", zhHant:"口感清爽乾冽，餘韻乾淨，曾在國內外屢獲殊榮。", eo:"Freŝa kaj seka kun pura postgusto — gajninto de multaj premioj hejme kaj eksterlande." },
     price:1780, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
 
   // ---- Beer & others ----
   { id:"beer-asahi-draft-glass", category:"beer", slipName:"グラスB",
-    name:{ en:"Draft Beer — Asahi Super Dry (Glass)", ja:"生ビール アサヒスーパードライ（グラス）", ko:"생맥주 아사히 슈퍼 드라이 (글라스)", zhHans:"生啤酒 朝日超爽（杯装）", zhHant:"生啤酒 朝日超爽（杯裝）" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Draft Beer — Asahi Super Dry (Glass) 250ml", ja:"生ビール アサヒスーパードライ（グラス） 250ml", ko:"생맥주 아사히 슈퍼 드라이 (글라스) 250ml", zhHans:"生啤酒 朝日超爽（杯装） 250ml", zhHant:"生啤酒 朝日超爽（杯裝） 250ml", eo:"Barelbiero — Asahi Super Dry (glaso) 250ml" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:580, requiresGlassCount:false, servingStyles:[] },
   { id:"beer-asahi-draft-mug", category:"beer", slipName:"生B",
-    name:{ en:"Draft Beer — Asahi Super Dry (Mug)", ja:"生ビール アサヒスーパードライ（ジョッキ）", ko:"생맥주 아사히 슈퍼 드라이 (조끼)", zhHans:"生啤酒 朝日超爽（扎杯）", zhHant:"生啤酒 朝日超爽（大杯）" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Draft Beer — Asahi Super Dry (Mug) 350ml", ja:"生ビール アサヒスーパードライ（ジョッキ） 350ml", ko:"생맥주 아사히 슈퍼 드라이 (조끼) 350ml", zhHans:"生啤酒 朝日超爽（扎杯） 350ml", zhHant:"生啤酒 朝日超爽（大杯） 350ml", eo:"Barelbiero — Asahi Super Dry (ĉopo) 350ml" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:700, requiresGlassCount:false, servingStyles:[] },
   { id:"beer-asahi-bottle", category:"beer", slipName:"アサヒB",
-    name:{ en:"Asahi Super Dry (Bottle)", ja:"アサヒスーパードライ（中瓶）", ko:"아사히 슈퍼 드라이 (병)", zhHans:"朝日超爽（中瓶）", zhHant:"朝日超爽（中瓶）" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Asahi Super Dry (Bottle)", ja:"アサヒスーパードライ（中瓶）", ko:"아사히 슈퍼 드라이 (병)", zhHans:"朝日超爽（中瓶）", zhHant:"朝日超爽（中瓶）", eo:"Asahi Super Dry (botelo)" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:700, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"beer-kirin-bottle", category:"beer", slipName:"キリンB",
-    name:{ en:"Kirin Lager (Bottle)", ja:"キリンラガー（中瓶）", ko:"기린 라거 (병)", zhHans:"麒麟拉格（中瓶）", zhHant:"麒麟拉格（中瓶）" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Kirin Lager (Bottle)", ja:"キリンラガー（中瓶）", ko:"기린 라거 (병)", zhHans:"麒麟拉格（中瓶）", zhHant:"麒麟拉格（中瓶）", eo:"Kirin Lager (botelo)" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:700, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"beer-yebisu-bottle", category:"beer", slipName:"エビスB",
-    name:{ en:"Yebisu Beer (Bottle)", ja:"エビスビール（中瓶）", ko:"에비스 맥주 (병)", zhHans:"惠比寿啤酒（中瓶）", zhHant:"惠比壽啤酒（中瓶）" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Yebisu Beer (Bottle)", ja:"エビスビール（中瓶）", ko:"에비스 맥주 (병)", zhHans:"惠比寿啤酒（中瓶）", zhHant:"惠比壽啤酒（中瓶）", eo:"Yebisu-biero (botelo)" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:750, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"beer-nonalcohol", category:"beer", slipName:"ノンアル",
-    name:{ en:"Non-Alcoholic Beer (Small Bottle)", ja:"ノンアルコールビール（小瓶）", ko:"논알코올 맥주 (작은 병)", zhHans:"无酒精啤酒（小瓶）", zhHant:"無酒精啤酒（小瓶）" },
-    desc:{ en:"(0.00% alcohol)", ja:"（アルコール0.00%）", ko:"(알코올 0.00%)", zhHans:"（酒精浓度0.00%）", zhHant:"（酒精濃度0.00%）" },
+    name:{ en:"Non-Alcoholic Beer (Small Bottle)", ja:"ノンアルコールビール（小瓶）", ko:"논알코올 맥주 (작은 병)", zhHans:"无酒精啤酒（小瓶）", zhHant:"無酒精啤酒（小瓶）", eo:"Nealkohola biero (malgranda botelo)" },
+    desc:{ en:"(0.00% alcohol)", ja:"（アルコール0.00%）", ko:"(알코올 0.00%)", zhHans:"（酒精浓度0.00%）", zhHant:"（酒精濃度0.00%）", eo:"(0,00% alkoholo)" },
     price:390, requiresGlassCount:true, vesselType:"bottle", servingStyles:[] },
   { id:"beer-highball", category:"beer", slipName:"ハイボール",
-    name:{ en:"Highball", ja:"ハイボール", ko:"하이볼", zhHans:"威士忌苏打（Highball）", zhHant:"威士忌蘇打（Highball）" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Highball", ja:"ハイボール", ko:"하이볼", zhHans:"威士忌苏打（Highball）", zhHant:"威士忌蘇打（Highball）", eo:"Highball" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:580, requiresGlassCount:false, servingStyles:[] },
 
   // ---- Shochu ----
   { id:"shochu-kurokirishima", category:"shochu", slipName:"黒霧島",
-    name:{ en:"Kurokirishima (Sweet Potato)", ja:"黒霧島（いも）", ko:"구로키리시마 (고구마)", zhHans:"黑雾岛（地瓜烧酒）", zhHant:"黑霧島（地瓜燒酒）" },
-    desc:{ en:"Black-koji sweetness with a smooth, crisp finish.", ja:"黒麹の醸すうまさはトロリとしたあまみ，キリッとした後切れにあります．", ko:"흑국의 은은한 단맛과 부드럽고 깔끔한 여운이 특징입니다.", zhHans:"黑曲的醇厚甘甜，口感顺滑清爽。", zhHant:"黑麴的醇厚甘甜，口感順滑清爽。" },
+    name:{ en:"Kurokirishima (Sweet Potato)", ja:"黒霧島（いも）", ko:"구로키리시마 (고구마)", zhHans:"黑雾岛（地瓜烧酒）", zhHant:"黑霧島（地瓜燒酒）", eo:"Kurokirishima (batato)" },
+    desc:{ en:"Black-koji sweetness with a smooth, crisp finish.", ja:"黒麹の醸すうまさはトロリとしたあまみ，キリッとした後切れにあります．", ko:"흑국의 은은한 단맛과 부드럽고 깔끔한 여운이 특징입니다.", zhHans:"黑曲的醇厚甘甜，口感顺滑清爽。", zhHant:"黑麴的醇厚甘甜，口感順滑清爽。", eo:"Dolĉeco de nigra koji kun glata, freŝa postgusto." },
     price:580, requiresGlassCount:true, vesselType:"bottle", servingStyles:SHOCHU_STYLES },
   { id:"shochu-rokudaime-yuri", category:"shochu", slipName:"六代目百合",
-    name:{ en:"Rokudaime Yuri (Sweet Potato)", ja:"六代目百合（いも）", ko:"로쿠다이메 유리 (고구마)", zhHans:"六代目百合（地瓜烧酒）", zhHant:"六代目百合（地瓜燒酒）" },
-    desc:{ en:"Light yet deep flavor that fully expresses the aroma of the sweet potato.", ja:"原料の芋の風味を最大限にいかした，軽快ながらも奥深い味わい．", ko:"가볍지만 깊은 맛으로 고구마 본연의 향을 풍부하게 느낄 수 있습니다.", zhHans:"口感轻盈却层次丰富，充分展现地瓜的香气。", zhHant:"口感輕盈卻層次豐富，充分展現地瓜的香氣。" },
+    name:{ en:"Rokudaime Yuri (Sweet Potato)", ja:"六代目百合（いも）", ko:"로쿠다이메 유리 (고구마)", zhHans:"六代目百合（地瓜烧酒）", zhHant:"六代目百合（地瓜燒酒）", eo:"Rokudaime Yuri (batato)" },
+    desc:{ en:"Light yet deep flavor that fully expresses the aroma of the sweet potato.", ja:"原料の芋の風味を最大限にいかした，軽快ながらも奥深い味わい．", ko:"가볍지만 깊은 맛으로 고구마 본연의 향을 풍부하게 느낄 수 있습니다.", zhHans:"口感轻盈却层次丰富，充分展现地瓜的香气。", zhHant:"口感輕盈卻層次豐富，充分展現地瓜的香氣。", eo:"Malpeza sed profunda gusto, kiu plene esprimas la aromon de la batato." },
     price:700, requiresGlassCount:true, vesselType:"bottle", servingStyles:SHOCHU_STYLES },
   { id:"shochu-akarui-nouson", category:"shochu", slipName:"明るい農村",
-    name:{ en:"Akarui Nouson Aka-imo Jikomi (Sweet Potato)", ja:"明るい農村 赤芋仕込み（いも）", ko:"아카루이 노손 아카이모 지코미 (고구마)", zhHans:"明亮农村 红薯酿造（地瓜烧酒）", zhHant:"明亮農村 紅薯釀造（地瓜燒酒）" },
-    desc:{ en:"Fruity aroma and gentle sweetness from red sweet potato, with a clean finish.", ja:"赤芋によるフルーティな香りとやさしい甘さ．すっきりとした飲み口が特長．", ko:"붉은 고구마 특유의 과일 향과 은은한 단맛, 깔끔한 여운이 특징입니다.", zhHans:"红薯特有的果香与温和甜味，余韵干净。", zhHant:"紅薯特有的果香與溫和甜味，餘韻乾淨。" },
+    name:{ en:"Akarui Nouson Aka-imo Jikomi (Sweet Potato)", ja:"明るい農村 赤芋仕込み（いも）", ko:"아카루이 노손 아카이모 지코미 (고구마)", zhHans:"明亮农村 红薯酿造（地瓜烧酒）", zhHant:"明亮農村 紅薯釀造（地瓜燒酒）", eo:"Akarui Nouson Aka-imo Jikomi (batato)" },
+    desc:{ en:"Fruity aroma and gentle sweetness from red sweet potato, with a clean finish.", ja:"赤芋によるフルーティな香りとやさしい甘さ．すっきりとした飲み口が特長．", ko:"붉은 고구마 특유의 과일 향과 은은한 단맛, 깔끔한 여운이 특징입니다.", zhHans:"红薯特有的果香与温和甜味，余韵干净。", zhHant:"紅薯特有的果香與溫和甜味，餘韻乾淨。", eo:"Frukta aromo kaj milda dolĉeco de ruĝa batato, kun pura postgusto." },
     price:810, requiresGlassCount:true, vesselType:"bottle", servingStyles:SHOCHU_STYLES },
   { id:"shochu-nikaido", category:"shochu", slipName:"二階堂",
-    name:{ en:"Nikaido (Barley)", ja:"二階堂（むぎ）", ko:"니카이도 (보리)", zhHans:"二阶堂（麦烧酒）", zhHant:"二階堂（麥燒酒）" },
-    desc:{ en:"Made from 100% barley, named directly after its raw ingredient.", ja:"麦100%を使用して麦焼酎を開発し，原材料をそのまま銘柄としています．", ko:"보리 100%로 만들어져 원재료의 이름을 그대로 딴 소주입니다.", zhHans:"100%大麦酿造，直接以原料命名。", zhHant:"100%大麥釀造，直接以原料命名。" },
+    name:{ en:"Nikaido (Barley)", ja:"二階堂（むぎ）", ko:"니카이도 (보리)", zhHans:"二阶堂（麦烧酒）", zhHant:"二階堂（麥燒酒）", eo:"Nikaido (hordeo)" },
+    desc:{ en:"Made from 100% barley, named directly after its raw ingredient.", ja:"麦100%を使用して麦焼酎を開発し，原材料をそのまま銘柄としています．", ko:"보리 100%로 만들어져 원재료의 이름을 그대로 딴 소주입니다.", zhHans:"100%大麦酿造，直接以原料命名。", zhHant:"100%大麥釀造，直接以原料命名。", eo:"Farita el 100% hordeo, nomita rekte laŭ sia ingredienco." },
     price:580, requiresGlassCount:true, vesselType:"bottle", servingStyles:SHOCHU_STYLES },
   { id:"shochu-obinokurakara", category:"shochu", slipName:"おびの倉から",
-    name:{ en:"Obi no Kura Kara (Barley)", ja:"おびの蔵から（むぎ）", ko:"오비노쿠라카라 (보리)", zhHans:"饫肥藏（麦烧酒）", zhHant:"飫肥藏（麥燒酒）" },
-    desc:{ en:"Blended with aged shochu for a rustic barley aroma and rounded flavor.", ja:"古酒をブレンドすることで，麦の素朴な香りと幅のある味を引き出しました．", ko:"숙성 소주를 블렌딩해 구수한 보리 향과 부드러운 맛을 살렸습니다.", zhHans:"混入陈年烧酒，带来质朴的麦香与圆润口感。", zhHant:"混入陳年燒酒，帶來質樸的麥香與圓潤口感。" },
+    name:{ en:"Obi no Kura Kara (Barley)", ja:"おびの蔵から（むぎ）", ko:"오비노쿠라카라 (보리)", zhHans:"饫肥藏（麦烧酒）", zhHant:"飫肥藏（麥燒酒）", eo:"Obi no Kura Kara (hordeo)" },
+    desc:{ en:"Blended with aged shochu for a rustic barley aroma and rounded flavor.", ja:"古酒をブレンドすることで，麦の素朴な香りと幅のある味を引き出しました．", ko:"숙성 소주를 블렌딩해 구수한 보리 향과 부드러운 맛을 살렸습니다.", zhHans:"混入陈年烧酒，带来质朴的麦香与圆润口感。", zhHant:"混入陳年燒酒，帶來質樸的麥香與圓潤口感。", eo:"Miksita kun maljuna ŝoĉuo por rustika hordea aromo kaj ronda gusto." },
     price:580, requiresGlassCount:true, vesselType:"bottle", servingStyles:SHOCHU_STYLES },
   { id:"shochu-amaterasu", category:"shochu", slipName:"天照",
-    name:{ en:"Amaterasu (Buckwheat)", ja:"天照（そば）", ko:"아마테라스 (메밀)", zhHans:"天照（荞麦烧酒）", zhHant:"天照（蕎麥燒酒）" },
-    desc:{ en:"Vacuum distilled for a light, refined flavor — smooth and clean.", ja:"減圧蒸留により，風味の軽い都会的．口当たりのまろやかさ，キレのよさが好評．", ko:"감압 증류로 가볍고 세련된 맛을 살려 부드럽고 깔끔합니다.", zhHans:"减压蒸馏工艺造就轻盈精致的风味，口感顺滑干净。", zhHant:"減壓蒸餾工藝造就輕盈精緻的風味，口感順滑乾淨。" },
+    name:{ en:"Amaterasu (Buckwheat)", ja:"天照（そば）", ko:"아마테라스 (메밀)", zhHans:"天照（荞麦烧酒）", zhHant:"天照（蕎麥燒酒）", eo:"Amaterasu (fagopiro)" },
+    desc:{ en:"Vacuum distilled for a light, refined flavor — smooth and clean.", ja:"減圧蒸留により，風味の軽い都会的．口当たりのまろやかさ，キレのよさが好評．", ko:"감압 증류로 가볍고 세련된 맛을 살려 부드럽고 깔끔합니다.", zhHans:"减压蒸馏工艺造就轻盈精致的风味，口感顺滑干净。", zhHant:"減壓蒸餾工藝造就輕盈精緻的風味，口感順滑乾淨。", eo:"Vakuuma distilado donas malpezan, rafinitan guston — glatan kaj puran." },
     price:580, requiresGlassCount:true, vesselType:"bottle", servingStyles:SHOCHU_STYLES },
   { id:"shochu-sannennetaro", category:"shochu", slipName:"三年寝太郎",
-    name:{ en:"Sannen Netaro (Rice)", ja:"三年寝太郎（こめ）", ko:"산넨 네타로 (쌀)", zhHans:"三年寝太郎（米烧酒）", zhHant:"三年寢太郎（米燒酒）" },
-    desc:{ en:"Slowly aged for three years — full umami with no harsh edge, easy to drink.", ja:"3年間じっくり熟成．しっかりとした旨味とクセがなく飲みやすい．", ko:"3년간 천천히 숙성시켜 감칠맛이 풍부하면서도 자극 없이 부드럽게 즐길 수 있습니다.", zhHans:"历经三年缓慢熟成，鲜味十足且口感圆润，易于入口。", zhHant:"歷經三年緩慢熟成，鮮味十足且口感圓潤，易於入口。" },
+    name:{ en:"Sannen Netaro (Rice)", ja:"三年寝太郎（こめ）", ko:"산넨 네타로 (쌀)", zhHans:"三年寝太郎（米烧酒）", zhHant:"三年寢太郎（米燒酒）", eo:"Sannen Netaro (rizo)" },
+    desc:{ en:"Slowly aged for three years — full umami with no harsh edge, easy to drink.", ja:"3年間じっくり熟成．しっかりとした旨味とクセがなく飲みやすい．", ko:"3년간 천천히 숙성시켜 감칠맛이 풍부하면서도 자극 없이 부드럽게 즐길 수 있습니다.", zhHans:"历经三年缓慢熟成，鲜味十足且口感圆润，易于入口。", zhHant:"歷經三年緩慢熟成，鮮味十足且口感圓潤，易於入口。", eo:"Malrapide maturigita dum tri jaroj — plena umami sen akreco, facile trinkebla." },
     price:580, requiresGlassCount:true, vesselType:"bottle", servingStyles:SHOCHU_STYLES },
 
   // ---- Soft drinks ----
+  { id:"soft-cold-water", category:"soft", slipName:"お冷や",
+    name:{ en:"Cold Water", ja:"冷たい水", ko:"차가운 물", zhHans:"冰水", zhHant:"冰水", eo:"Malvarma akvo" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
+    price:0, requiresGlassCount:false, servingStyles:[] },
   { id:"soft-orange-juice", category:"soft", slipName:"オレンジジュース",
-    name:{ en:"Orange Juice", ja:"オレンジジュース", ko:"오렌지 주스", zhHans:"橙汁", zhHant:"柳橙汁" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Orange Juice", ja:"オレンジジュース", ko:"오렌지 주스", zhHans:"橙汁", zhHant:"柳橙汁", eo:"Oranĝosuko" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:390, requiresGlassCount:false, servingStyles:[] },
   { id:"soft-kirin-lemon", category:"soft", slipName:"キリンレモン",
-    name:{ en:"Kirin Lemon", ja:"キリンレモン", ko:"기린 레몬", zhHans:"麒麟柠檬汽水", zhHant:"麒麟檸檬汽水" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Kirin Lemon", ja:"キリンレモン", ko:"기린 레몬", zhHans:"麒麟柠檬汽水", zhHant:"麒麟檸檬汽水", eo:"Kirin Lemon" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:390, requiresGlassCount:false, servingStyles:[] },
   { id:"soft-cola", category:"soft", slipName:"コーラ",
-    name:{ en:"Cola", ja:"コーラ", ko:"콜라", zhHans:"可乐", zhHant:"可樂" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Cola", ja:"コーラ", ko:"콜라", zhHans:"可乐", zhHant:"可樂", eo:"Kolao" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:390, requiresGlassCount:false, servingStyles:[] },
   { id:"soft-oolong", category:"soft", slipName:"ウーロン茶",
-    name:{ en:"Oolong Tea", ja:"ウーロン茶", ko:"우롱차", zhHans:"乌龙茶", zhHant:"烏龍茶" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Oolong Tea", ja:"ウーロン茶", ko:"우롱차", zhHans:"乌龙茶", zhHant:"烏龍茶", eo:"Oolong-teo" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:390, requiresGlassCount:false, servingStyles:[] },
   { id:"soft-iced-coffee", category:"soft", slipName:"アイスコーヒー",
-    name:{ en:"Iced Coffee", ja:"アイスコーヒー", ko:"아이스 커피", zhHans:"冰咖啡", zhHant:"冰咖啡" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Iced Coffee", ja:"アイスコーヒー", ko:"아이스 커피", zhHans:"冰咖啡", zhHant:"冰咖啡", eo:"Glacia kafo" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:450, requiresGlassCount:false, servingStyles:[] },
   { id:"soft-hot-coffee", category:"soft", slipName:"ホットコーヒー",
-    name:{ en:"Hot Coffee", ja:"ホットコーヒー", ko:"핫 커피", zhHans:"热咖啡", zhHant:"熱咖啡" },
-    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"" },
+    name:{ en:"Hot Coffee", ja:"ホットコーヒー", ko:"핫 커피", zhHans:"热咖啡", zhHant:"熱咖啡", eo:"Varma kafo" },
+    desc:{ en:"", ja:"", ko:"", zhHans:"", zhHant:"", eo:"" },
     price:450, requiresGlassCount:false, servingStyles:[] },
 ];
 
@@ -372,6 +420,12 @@ function isReady(d, st) {
 
 // cart: array of { key, id, name, price, qty, bottles, glasses, vesselType, style }
 let cart = [];
+// "first" = drinks before the meal, "with" = drinks with the meal, null = not chosen yet
+let serveTiming = null;
+const TIMING_OPTIONS = [
+  { value:"first", textKey:"timingFirst", ja:"食事より先に" },
+  { value:"with",  textKey:"timingWith",  ja:"食事と一緒に" }
+];
 
 /* ============================================================
    Helpers
@@ -701,12 +755,32 @@ function renderOrder() {
   backBtn.textContent = "← " + t.back;
   showStaffBtn.textContent = t.showToStaff;
 
+  const timingBox = document.getElementById("timing-select");
   if (cart.length === 0) {
+    serveTiming = null;
     list.innerHTML = `<p class="empty-note">${t.emptyOrder}</p>`;
+    timingBox.innerHTML = "";
     showStaffBtn.disabled = true;
     return;
   }
-  showStaffBtn.disabled = false;
+  showStaffBtn.disabled = serveTiming === null;
+
+  timingBox.innerHTML = `
+    <div class="timing-block">
+      <div class="timing-heading">${t.servingTimingHeading}</div>
+      <div class="timing-options">
+        ${TIMING_OPTIONS.map(o =>
+          `<button type="button" class="style-option timing-option${o.value === serveTiming ? " selected" : ""}" data-timing="${o.value}">${t[o.textKey]}</button>`
+        ).join("")}
+      </div>
+      ${serveTiming === null ? `<div class="timing-required">${t.timingRequired}</div>` : ""}
+    </div>`;
+  timingBox.querySelectorAll(".timing-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      serveTiming = btn.dataset.timing;
+      renderOrder();
+    });
+  });
 
   list.innerHTML = cart.map(item => {
     const opts = [];
@@ -758,7 +832,9 @@ function renderStaff() {
   }
   const staffNoteJa = "この画面をスタッフにお見せください";
   const staffNote = currentLang === "ja" ? staffNoteJa : `${t.showToStaffNote} / ${staffNoteJa}`;
-  list.innerHTML = cart.map(item => {
+  const timing = TIMING_OPTIONS.find(o => o.value === serveTiming);
+  const timingBanner = timing ? `<div class="staff-timing">提供：${timing.ja}</div>` : "";
+  list.innerHTML = timingBanner + cart.map(item => {
     const opts = [];
     if (item.bottles) {
       const labels = VESSEL_LABELS[item.vesselType];

@@ -21,16 +21,18 @@ QR_334749.png    案内QRコード(未コミット/gitignore対象にするか�
 
 1. `age-gate` — 年齢確認。20歳未満を選ぶとソフトドリンクのみ表示するモードになる
 2. `menu-screen` — カテゴリ別メニュー一覧、カート個数バッジ
-3. `order-screen` — 客側の注文内容確認・数量変更
-4. `staff-screen` — 店員に見せる用の画面。常に日本語固定・価格非表示
+3. `order-screen` — 客側の注文内容確認・数量変更。注文全体の提供タイミング(食事より先に/食事と一緒に)をここで選ぶ(未選択だと「店員に見せる」が押せない)
+4. `staff-screen` — 店員に見せる用の画面。常に日本語固定・価格非表示。先頭に「提供：食事より先に/食事と一緒に」を表示
 
-状態は`sessionStorage`(`kawayodo_age_confirmed`, `kawayodo_lang`)とページ内メモリ(`cart`, `itemState`)のみ。サーバー通信・永続化は無く、リロードすると注文内容は消える。
+状態は`sessionStorage`(`kawayodo_age_confirmed`, `kawayodo_lang`)とページ内メモリ(`cart`, `itemState`, `serveTiming`)のみ。サーバー通信・永続化は無く、リロードすると注文内容は消える。
 
 ## 多言語対応
 
-`LANGUAGES`(en/ja/ko/zhHans/zhHant)を軸に、UI文言は`UI_TEXT`、カテゴリ名は`CATEGORIES`、各ドリンクの`name`/`desc`は`DRINKS`配列の各要素に言語別オブジェクトとして直接持たせている。翻訳はビルド時ではなく実行時に`currentLang`で出し分け(i18nライブラリ不使用)。
+`LANGUAGES`(en/ja/ko/zhHans/zhHant/eo)を軸に、UI文言は`UI_TEXT`、カテゴリ名は`CATEGORIES`、各ドリンクの`name`/`desc`は`DRINKS`配列の各要素に言語別オブジェクトとして直接持たせている。翻訳はビルド時ではなく実行時に`currentLang`で出し分け(i18nライブラリ不使用)。
 
 店員画面(`renderStaff`)だけは言語切り替えの影響を受けず、`slipName`(伝票名, 日本語)を使う。
+
+言語を追加するときは、`UI_TEXT`・`CATEGORIES`・`VESSEL_LABELS`・`STYLE_*`・`DRINKS`の全`name`/`desc`に同じキーを足す(未定義だと`undefined`が表示される)。複数形は`formatVesselCount`で言語別に処理している(英語は`pluralize`、エスペラント語は`-j`付加)。
 
 ## ドリンクデータ (`DRINKS`配列)
 
@@ -42,6 +44,7 @@ QR_334749.png    案内QRコード(未コミット/gitignore対象にするか�
 - `slipName` — 店員画面用の伝票表記(日本語のみ)
 - `requiresGlassCount` — trueなら「本数+グラス数(または徳利数+お猪口数)」の2軸入力、falseなら単純な個数入力
 - `vesselType` — `"bottle"`(本/グラス)か`"tokkuri"`(徳利/お猪口)。`VESSEL_LABELS`で単位表記を切り替える
+- `price` — 円。`0`なら「¥0」と表示される(冷たい水`soft-cold-water`が該当、個数のみ選択)
 - `servingStyles` — 飲み方選択肢(熱燗/ロック/水割り等)。`SAKE_STYLES`/`SHOCHU_STYLES`/`UMESHU_STYLES`として定義済みの配列を再利用
 
 カートのキー(`cartKey`)は`id + 本数 + グラス数 + 飲み方`の組み合わせで生成しており、同じドリンクでも本数/飲み方が違えばカート内で別行になる。

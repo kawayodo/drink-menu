@@ -359,7 +359,8 @@ main#menu-list { padding: 4px 12px 90px; }
 }
 
 /* ---------- Order screen ---------- */
-#order-list { padding: 12px 16px 120px; }
+#order-list { padding: 12px 16px 4px; }
+#timing-select { padding: 0 16px 120px; }
 
 .empty-note {
   text-align: center;
@@ -435,6 +436,31 @@ main#menu-list { padding: 4px 12px 90px; }
 
 .staff-name { font-size: 22px; font-weight: bold; }
 .staff-options { font-size: 15px; color: #55504a; margin-top: 6px; }
+
+.timing-block {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 6px;
+}
+
+.timing-heading { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+
+.timing-option { padding: 9px 16px; font-size: 13px; }
+
+.timing-required { font-size: 12px; color: var(--red); margin-top: 8px; }
+
+.staff-timing {
+  background: var(--red);
+  color: #fff;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
 
 .staff-note {
   text-align: center;
